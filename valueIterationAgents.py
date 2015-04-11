@@ -46,14 +46,17 @@ class ValueIterationAgent(ValueEstimationAgent):
 
         # Write value iteration code here
         "*** YOUR CODE HERE ***"
-        Vs = util.Counter()     
+        # (1/ 2) Each state value per iteration is stored here
+        stateValues = util.Counter()     
+        
         for iteration in xrange(iterations):
             for state in self.mdp.getStates():
-                actions = self.mdp.getPossibleActions(state)
-                if len(actions) > 0:
-                    Vs[state] = max([self.computeQValueFromValues(state, action) \
-                        for action in actions])
-            self.values = Vs.copy()
+                if not self.mdp.isTerminal(state):  # Terminal state has no actions!
+                    stateValues[state] = max( [\
+                        self.computeQValueFromValues(state, action) \
+                        for action in self.mdp.getPossibleActions(state) ])
+            # (2/ 2) Then copied to self.values after each iteration
+            self.values = stateValues.copy()
 
 
     def getValue(self, state):
@@ -71,6 +74,7 @@ class ValueIterationAgent(ValueEstimationAgent):
         qValue = 0
         for nextState, prob in self.mdp.getTransitionStatesAndProbs(state, action):
             reward = self.mdp.getReward(state, action, nextState)
+            # The weighted average according to prob, instanteous reward and next state value
             qValue += prob * ( reward + self.discount * self.getValue(nextState) )
         return qValue
 
@@ -85,15 +89,16 @@ class ValueIterationAgent(ValueEstimationAgent):
         """
         "*** YOUR CODE HERE ***"
         if self.mdp.isTerminal(state):
-            return None
-        actions = self.mdp.getPossibleActions(state)
-        qValues = []
-        for action in actions:
-            qValues.append( (action, self.computeQValueFromValues(state, action)) )
+            return None     # There is no action at terminal state
 
+        # All qValue, action pairs from this state according to possible actions
+        qValues_actions = [ (action, self.computeQValueFromValues(state, action)) \
+                                for action in self.mdp.getPossibleActions(state) ]
+
+        # Compute best action according to best qValues
         maxQValue = float('-inf')
         bestAction = ''
-        for action, qValue in qValues:
+        for action, qValue in qValues_actions:
             if qValue > maxQValue:
                 maxQValue = qValue
                 bestAction = action
