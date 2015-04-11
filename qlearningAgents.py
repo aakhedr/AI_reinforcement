@@ -104,11 +104,11 @@ class QLearningAgent(ReinforcementAgent):
         legalActions = self.getLegalActions(state)
         action = None
         "*** YOUR CODE HERE ***"
-        if len(legalAcitons) > 0:
-            if util.flipCoin(sef.epsilon) :
-                return random.choise(actions)
+        if len(legalActions) > 0:
+            if util.flipCoin(self.epsilon) :
+                return random.choice(legalActions)
             else:
-                return computeActionFromQValues(state)
+                return self.computeActionFromQValues(state)
         return action
 
     def update(self, state, action, nextState, reward):
@@ -178,6 +178,8 @@ class ApproximateQAgent(PacmanQAgent):
     """
     def __init__(self, extractor='IdentityExtractor', **args):
         self.featExtractor = util.lookup(extractor, globals())()
+        print self.featExtractor
+        util.pause()
         PacmanQAgent.__init__(self, **args)
         self.weights = util.Counter()
 
